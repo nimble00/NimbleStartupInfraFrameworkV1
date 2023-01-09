@@ -140,7 +140,7 @@ export class PubSubStack extends Stack {
             topicName: CLICK_THRU_SNS_NAME
         });
 
-        this.ctEventBus = new EventBus(this, CLICK_THRU_EVENT_BUS_NAME,{
+        this.ctEventBus = new EventBus(this, CLICK_THRU_EVENT_BUS_NAME, {
             eventBusName: CLICK_THRU_EVENT_BUS_NAME
         });
 
@@ -148,10 +148,10 @@ export class PubSubStack extends Stack {
             description: "description",
             eventPattern: {
                 source: [Namespace.LMB, Namespace.CTB],
-                resources: [ "r1", "r2" ],
+                resources: ["r1", "r2"],
                 detail: {
-                    hello: [ 1 ],
-                    foo: [ "bar" ]
+                    hello: [1],
+                    foo: ["bar"]
                 }
 
             },

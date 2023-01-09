@@ -9,13 +9,11 @@ import {
     Role,
     ServicePrincipal
 } from "aws-cdk-lib/aws-iam";
-import {Code, DockerImageFunction, EventSourceMapping, Function, Runtime} from "aws-cdk-lib/aws-lambda";
+import {Code, EventSourceMapping, Function, Runtime} from "aws-cdk-lib/aws-lambda";
 import {Alarm, AlarmWidget, Dashboard, GraphWidget, TreatMissingData} from "aws-cdk-lib/aws-cloudwatch";
-import {DataStoresStack} from "./data-stores";;
-import {CT_WRITE_LAMBDA_NAME} from "../common/compute-constants";
+import {DataStoresStack} from "./data-stores";
+import {CT_WRITE_LAMBDA_INVOKE_ERRORS_THRESHOLD, CT_WRITE_LAMBDA_NAME} from "../common/compute-constants";
 import * as path from "path";
-import {ExpectedResult, IntegTest, InvocationType} from "@aws-cdk/integ-tests-alpha";
-import {CLICK_THRU_EVENTS_Q_NAME} from "../common/pubsub-constants";
 import {PubSubStack} from "./pub-sub";
 import {AlarmNames, SERVICE_RUNBOOK_LINK, STATISTIC} from "../monitoring/telemetry-constants";
 
@@ -46,8 +44,6 @@ export class CtLambdaStack extends Stack {
 
         this.createLambdaIamRole(this, props);
         this.createCtLambdaAndMapping(this, props);
-
-        this.createIntegrationTestingInfra(this, props);
 
         this.createLambdaDashboard('CtEventsLambda', this.CtEventsLambda, props.PubSubStack.CtEventsQueue, props.PubSubStack.CtEventsDLQ, props.stage);
         if (props.setupAlarms) {
@@ -90,23 +86,27 @@ export class CtLambdaStack extends Stack {
     }
 
     private createCtLambdaAndMapping(scope: Stack, props: CtLambdaStackProps) {
-        this.CtEventsLambda = new DockerImageFunction(scope, CT_WRITE_LAMBDA_NAME, {
-            functionName: CT_WRITE_LAMBDA_NAME,
-            description: '<<<insert description here>>>',
-            environment: {
-                DDBTableArn: props.DataStoreStack.ddbTable.tableArn,
-                AWS_SERVICE_REGION: String(props.env.region)
-            },
-            handler: 'index.main',
-            code: Code.fromAsset(path.join(__dirname, '/../src/my-lambda')),
+        // lambda function definition
+        this.CtEventsLambda = new Function(this, CT_WRITE_LAMBDA_NAME, {
+            functionName: CT_WRITE_LAMBDA_NAME, // cannot be modified easily so decide carefully
+            description: 'description',
+            runtime: Runtime.PYTHON_3_8,
             memorySize: 1024,
+            timeout: Duration.minutes(5), // limit: max 15 mins
+            handler: 'index.main',
             vpc: props.secureVpc,
-            runtime: Runtime.FROM_IMAGE,
             deadLetterQueueEnabled: true,
             role: this.CtLambdaBasicIamRole,
             reservedConcurrentExecutions: 1,
-            timeout: Duration.minutes(15),
-        })
+            code: Code.fromAsset(path.join(__dirname, '/../src/my-lambda')),
+            environment: {
+                DDBTableArn: props.DataStoreStack.ddbTable.tableArn,
+                REGION: Stack.of(this).region,
+                AVAILABILITY_ZONES: JSON.stringify(
+                    Stack.of(this).availabilityZones,
+                ),
+            },
+        });
 
         new EventSourceMapping(scope, "CtEventSQSEventSourceMapping", {
             eventSourceArn: props.PubSubStack.CtEventsQueue.queueArn,
@@ -119,37 +119,6 @@ export class CtLambdaStack extends Stack {
 
     }
 
-    private createIntegrationTestingInfra(scope: Stack, props: CtLambdaStackProps) {
-        const integ = new IntegTest(app, 'Integ', {
-            testCases: [stack],
-        });
-
-        integ.assertions.invokeFunction({
-            functionName: CT_WRITE_LAMBDA_NAME,
-            invocationType: InvocationType.EVENT,
-            payload: JSON.stringify({ status: 'OK' }),
-        });
-
-        const message = integ.assertions.awsApiCall('SQS', 'receiveMessage', {
-            QueueUrl: CLICK_THRU_EVENTS_Q_NAME.queueUrl,
-            WaitTimeSeconds: 20,
-        });
-
-        message.assertAtPath('Messages.0.Body', ExpectedResult.objectLike({
-            requestContext: {
-                condition: 'Success',
-            },
-            requestPayload: {
-                status: 'OK',
-            },
-            responseContext: {
-                statusCode: 200,
-            },
-            responsePayload: 'success',
-        }));
-        this.CtEventsLambda.grantInvoke(this.hydraResources.invocationRole);
-    }
-
     private createLambdaDashboard(fname: string, productionVariant: Function, mainQ: Queue, dlQ: Queue, stage: string) {
         const dashboard = new Dashboard(this, `${fname}-Dashboard-${stage}-${this.region}`);
         dashboard.addWidgets(
@@ -157,9 +126,9 @@ export class CtLambdaStack extends Stack {
                 alarm: productionVariant.metricErrors({statistic: STATISTIC.SUM}).createAlarm(this,
                     `${fname}-${AlarmNames.LAMBDA_INVOCATION_ERRORS2}`, {
                         alarmName: `${fname}-LAMBDA_INVOCATION_ERRORS_SEV2`,
-                        alarmDescription: `CT Lambda:${AlarmNames.LAMBDA_INVOCATION_ERRORS2} breached the threshold (${50}). \n
+                        alarmDescription: `CT Lambda:${AlarmNames.LAMBDA_INVOCATION_ERRORS2} breached the threshold (${CT_WRITE_LAMBDA_INVOKE_ERRORS_THRESHOLD}). \n
                 Refer the Service Runbook - ${SERVICE_RUNBOOK_LINK}`,
-                        threshold: 50,
+                        threshold: CT_WRITE_LAMBDA_INVOKE_ERRORS_THRESHOLD,
                         evaluationPeriods: 5,
                         treatMissingData: TreatMissingData.NOT_BREACHING
                     })

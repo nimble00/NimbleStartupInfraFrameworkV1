@@ -93,7 +93,7 @@ export class DataStoresStack extends Stack {
                 left: [
                     ddbTable.metricSuccessfulRequestLatency({
                         statistic: STATISTIC.P90,
-                        dimensionsMap:{
+                        dimensionsMap: {
                             TableName: CLICK_THRU_DDB_TABLE_NAME,
                             Operation: Operation.BATCH_GET_ITEM
                         },
@@ -101,7 +101,7 @@ export class DataStoresStack extends Stack {
                     }),
                     ddbTable.metricSuccessfulRequestLatency({
                         statistic: STATISTIC.P99,
-                        dimensionsMap:{
+                        dimensionsMap: {
                             TableName: CLICK_THRU_DDB_TABLE_NAME,
                             Operation: Operation.BATCH_GET_ITEM
                         },
@@ -109,7 +109,7 @@ export class DataStoresStack extends Stack {
                     }),
                     ddbTable.metricSuccessfulRequestLatency({
                         statistic: STATISTIC.P99_9,
-                        dimensionsMap:{
+                        dimensionsMap: {
                             TableName: CLICK_THRU_DDB_TABLE_NAME,
                             Operation: Operation.BATCH_GET_ITEM
                         },
@@ -122,7 +122,7 @@ export class DataStoresStack extends Stack {
                 left: [
                     ddbTable.metricSuccessfulRequestLatency({
                         statistic: STATISTIC.P90,
-                        dimensionsMap:{
+                        dimensionsMap: {
                             TableName: CLICK_THRU_DDB_TABLE_NAME,
                             Operation: Operation.PUT_ITEM
                         },
@@ -130,7 +130,7 @@ export class DataStoresStack extends Stack {
                     }),
                     ddbTable.metricSuccessfulRequestLatency({
                         statistic: STATISTIC.P99,
-                        dimensionsMap:{
+                        dimensionsMap: {
                             TableName: CLICK_THRU_DDB_TABLE_NAME,
                             Operation: Operation.PUT_ITEM
                         },
@@ -138,7 +138,7 @@ export class DataStoresStack extends Stack {
                     }),
                     ddbTable.metricSuccessfulRequestLatency({
                         statistic: STATISTIC.P99_9,
-                        dimensionsMap:{
+                        dimensionsMap: {
                             TableName: CLICK_THRU_DDB_TABLE_NAME,
                             Operation: Operation.PUT_ITEM
                         },

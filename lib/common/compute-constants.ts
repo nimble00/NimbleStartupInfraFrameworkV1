@@ -4,6 +4,7 @@ import {STAGE} from "./base-constants";
 
 export const CT_WRITE_LAMBDA_NAME = 'CtWriteLambda';
 export const CT_READ_LAMBDA_NAME = 'CtReadLambda';
+export const CT_WRITE_LAMBDA_INVOKE_ERRORS_THRESHOLD = 10;
 
 export const LAMBDAS_CONFIG = {
     [STAGE.DEVO]: {
