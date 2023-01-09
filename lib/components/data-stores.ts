@@ -12,9 +12,8 @@ import {MINUTES_1, MINUTES_5, STATISTIC} from "../monitoring/telemetry-constants
 export interface DataStoresProps extends StackProps {
     readonly env: Environment;
     readonly vpcStack: VpcStack;
-    readonly suffix?: string;
+    readonly suffix: string;
     readonly stackName?: string;
-    readonly stage: string;
     /**
      * Stack tags that will be applied to all the taggable resources and the stack itself.
      *
@@ -44,7 +43,7 @@ export class DataStoresStack extends Stack {
             billingMode: BillingMode.PAY_PER_REQUEST
         });
 
-        this.createDdbDashboard(this.ddbTable, props.stage);
+        this.createDdbDashboard(this.ddbTable, props.suffix);
     }
 
     private createDdbDashboard(ddbTable: Table, stage: string) {

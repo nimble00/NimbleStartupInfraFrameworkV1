@@ -6,38 +6,32 @@ import {
     Metric,
     TreatMissingData
 } from "aws-cdk-lib/aws-cloudwatch";
+import {App, Duration, Environment, Stack} from "aws-cdk-lib";
 import {
-    ALARM_ACTIVE_OUTSIDE_MAINT_AND_BATCH_JOBS_MATH_EXPR, CustomMetricConfigProps,
-    CustomMetricsConfig, SERVICE_RUNBOOK_LINK,
-} from "../monitoring/constants";
-import {App, Duration} from "aws-cdk-lib";
-import {DeploymentEnvironment, DeploymentStack, SoftwareType} from "@amzn/pipelines";
-import {SIMTicketingAlarmAction, TicketSeverity} from "@amzn/alexa-ml-common-constructs";
-import {STAGE, team} from "../common/constants";
-import {createOrdersCreatedMetric} from "../common/utils";
+    ALARM_ACTIVE_OUTSIDE_MAINT_AND_BATCH_JOBS_MATH_EXPR,
+    CustomMetricConfigProps,
+    CustomMetricsConfig, SERVICE_RUNBOOK_LINK
+} from "./telemetry-constants";
+import {joinStrings} from "../common/utils";
 
 
 export interface MonitorDashboardStackProps {
-    readonly env: DeploymentEnvironment;
+    readonly suffix: string;
+    readonly env: Environment;
     readonly stage: string;
     readonly allAlarms: Alarm[];
 }
 
-export class MonitorDashboardStack extends DeploymentStack {
-    readonly orderRateMetric: Metric;
+export class MonitorDashboardStack extends Stack {
 
     constructor(parent: App, name: string, props: MonitorDashboardStackProps) {
         super(parent, name, {
-            softwareType: SoftwareType.INFRASTRUCTURE,
             ...props
         });
 
-        if (props.stage === STAGE.PROD) {
-            this.orderRateMetric = createOrdersCreatedMetric();
-        }
         const customMetrics: Metric[] = this.registerCustomMetricsAndCreateAlarms(props.stage);
-        this.createCustomDashboard(customMetrics, props.stage, props.env.region);
-        this.createAlarmViewDashboard(props.allAlarms, props.stage, props.env.region);
+        this.createCustomDashboard(customMetrics, props);
+        this.createAlarmViewDashboard(props.allAlarms, props);
     }
 
     private registerCustomMetricsAndCreateAlarms(stage: string) {
@@ -68,28 +62,13 @@ export class MonitorDashboardStack extends DeploymentStack {
 
             customMetrics.push(metric);
         });
-
-        const alarmActionSev3 = new SIMTicketingAlarmAction({
-            severity: TicketSeverity.SEV3,
-            cti: team.cti,
-            resolverGroup: team.group
-        });
-        const alarmActionSev2 = new SIMTicketingAlarmAction({
-            severity: TicketSeverity.SEV2_5,
-            cti: team.cti,
-            resolverGroup: team.group
-        });
-        if (stage == 'Prod') {
-            alarms.forEach(alarm => alarm.addAlarmAction(alarmActionSev3));
-            alarmsSEV2.forEach(alarm => alarm.addAlarmAction(alarmActionSev2));
-        }
         return customMetrics;
     }
 
     private createAlarmForMetric(metric: any, metricConfig: CustomMetricConfigProps) {
-        return metric.createAlarm(this, `Graf${metricConfig.name}Alarm-${this.region}`, {
-            alarmName: `Graf${metricConfig.name}Alarm`,
-            alarmDescription: `GRAFRT:${metricConfig.name} breached the threshold (${metricConfig.threshold}). \n
+        return metric.createAlarm(this, `CT${metricConfig.name}Alarm-${this.region}`, {
+            alarmName: `CT-${metricConfig.name}Alarm`,
+            alarmDescription: `CT:${metricConfig.name} breached the threshold (${metricConfig.threshold}). \n
             Refer the Service Runbook - ${SERVICE_RUNBOOK_LINK}`,
             evaluationPeriods: metricConfig.evaluationPeriods == undefined ? 5 : metricConfig.evaluationPeriods,
             threshold: metricConfig.threshold,
@@ -98,8 +77,8 @@ export class MonitorDashboardStack extends DeploymentStack {
         });
     }
 
-    private createCustomDashboard(metrics: Metric[], stage: string, region: string) {
-        const dashboard = new Dashboard(this, `GrafRTCodebaseMetricsDashboard-${stage}-${region}`);
+    private createCustomDashboard(metrics: Metric[], props: MonitorDashboardStackProps) {
+        const dashboard = new Dashboard(this, joinStrings(`CTCodebaseMetricsDashboard`, props.suffix));
         metrics.forEach(metric => {
             dashboard.addWidgets(
                 new GraphWidget({
@@ -112,8 +91,8 @@ export class MonitorDashboardStack extends DeploymentStack {
         });
     }
 
-    private createAlarmViewDashboard(alarms: Alarm[], stage: string, region: string) {
-        const dashboard = new Dashboard(this, `GrafAlarmsOverviewDashboard-${stage}-${region}`);
+    private createAlarmViewDashboard(alarms: Alarm[], props: MonitorDashboardStackProps) {
+        const dashboard = new Dashboard(this, joinStrings(`CTAlarmsOverviewDashboard`, props.suffix));
         alarms.forEach(alarm => {
             dashboard.addWidgets(
                 new AlarmWidget({

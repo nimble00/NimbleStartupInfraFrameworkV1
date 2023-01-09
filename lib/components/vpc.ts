@@ -1,5 +1,5 @@
 import {App, Environment, Stack} from 'aws-cdk-lib';
-import {AccountPrincipal, AnyPrincipal, Effect, PolicyDocument, PolicyStatement, Role} from "aws-cdk-lib/aws-iam";
+import {AnyPrincipal, Effect, PolicyStatement} from "aws-cdk-lib/aws-iam";
 import {
     FlowLogDestination,
     FlowLogTrafficType, GatewayVpcEndpointAwsService,
@@ -7,7 +7,6 @@ import {
     SecurityGroup, SubnetType, Vpc
 } from "aws-cdk-lib/aws-ec2";
 import {joinStrings} from "../common/utils";
-import {CW_DASHBOARD_ROLE_NAME, CW_WIKI_AWS_ACCOUNT} from "../monitoring/telemetry-constants";
 
 // If you want to add parameters for your CDK Stack, you can toss them in here
 export interface VpcStackProps {
