@@ -9,7 +9,7 @@ import {
   ScanProfile,
   GordianKnotScannerApprovalWorkflowStep
 } from '@amzn/pipelines';
-import {VpcStack} from '../lib/vpc';
+import {VpcStack} from './components/vpc';
 import {ModelHostingStack} from '../lib/model-hosting';
 import {SourceStorageStack} from '../lib/source-storage';
 import {ModelHostingLambdas, ReplicationTargets} from '@amzn/alexa-ml-hosting-constructs';

@@ -16,9 +16,9 @@ import {
 } from "aws-cdk-lib/aws-ec2";
 import {CfnAssessmentTarget} from "aws-cdk-lib/aws-inspector";
 import ec2 = require('aws-cdk-lib/aws-ec2');
-import {CW_DASHBOARD_ROLE_NAME, CW_WIKI_AWS_ACCOUNT} from "./monitoring/constants";
+import {CW_DASHBOARD_ROLE_NAME, CW_WIKI_AWS_ACCOUNT} from "../monitoring/constants";
 import {team} from "./common/constants";
-import {isExperiment} from "./common/utils";
+import {isExperiment} from "../common/utils";
 import {TodWorker} from "@amzn/alexa-ml-common-constructs/lib/configuration";
 
 // If you want to add parameters for your CDK Stack, you can toss them in here

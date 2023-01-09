@@ -1,13 +1,13 @@
 import {App, Environment, Stack, StackProps} from "aws-cdk-lib";
 import {AttributeType, BillingMode, Operation, Table, TableEncryption} from "aws-cdk-lib/aws-dynamodb";
-import {VpcStack} from "../vpc";
+import {VpcStack} from "./vpc";
 import {Dashboard, GraphWidget} from "aws-cdk-lib/aws-cloudwatch";
-import {MINUTES_1, MINUTES_5, STATISTIC} from "../monitoring/constants";
 import {
     CLICK_THRU_DDB_TABLE_NAME,
     CLICK_THRU_DDB_TABLE_PRIMARY_KEY,
     CLICK_THRU_DDB_TABLE_TTL_KEY
 } from "../common/datastore-constants";
+import {MINUTES_1, MINUTES_5, STATISTIC} from "../monitoring/telemetry-constants";
 
 export interface DataStoresProps extends StackProps {
     readonly env: Environment;
@@ -43,8 +43,8 @@ export class DataStoresStack extends Stack {
             encryption: TableEncryption.AWS_MANAGED,
             billingMode: BillingMode.PAY_PER_REQUEST
         });
-        this.createDdbDashboard(this.ddbTable, props.stage);
 
+        this.createDdbDashboard(this.ddbTable, props.stage);
     }
 
     private createDdbDashboard(ddbTable: Table, stage: string) {
