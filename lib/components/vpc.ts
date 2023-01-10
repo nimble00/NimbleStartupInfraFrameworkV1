@@ -4,9 +4,10 @@ import {
     FlowLogDestination,
     FlowLogTrafficType, GatewayVpcEndpointAwsService,
     InterfaceVpcEndpointAwsService, PrivateSubnet,
-    SecurityGroup, SubnetType, Vpc
+    SubnetType, Vpc
 } from "aws-cdk-lib/aws-ec2";
 import {joinStrings} from "../common/utils";
+import {Construct} from "constructs";
 
 // If you want to add parameters for your CDK Stack, you can toss them in here
 export interface VpcStackProps {
@@ -27,9 +28,8 @@ export interface VpcStackProps {
 
 export class VpcStack extends Stack {
     public readonly secureVpc: Vpc;
-    public readonly modelSecurityGroup: SecurityGroup;
 
-    constructor(parent: App, name: string, props: VpcStackProps) {
+    constructor(parent: Construct, name: string, props: VpcStackProps) {
         super(parent, name, {
             ...props
         });
@@ -72,7 +72,7 @@ export class VpcStack extends Stack {
         this.secureVpc.addGatewayEndpoint(joinStrings('s3Endpoint', props.suffix), {
             service: GatewayVpcEndpointAwsService.S3,
             subnets: [
-                {subnetType: SubnetType.PRIVATE_ISOLATED}
+                {subnetType: SubnetType.PRIVATE_WITH_EGRESS}
             ]
         });
 

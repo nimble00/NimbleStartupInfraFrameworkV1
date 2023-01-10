@@ -13,6 +13,7 @@ import {
 } from "../common/pubsub-constants";
 import {Namespace, SERVICE_RUNBOOK_LINK} from "../monitoring/telemetry-constants";
 import {joinStrings} from "../common/utils";
+import {Construct} from "constructs";
 
 
 export interface PubSubStackProps {
@@ -33,7 +34,7 @@ export class PubSubStack extends Stack {
     ctEbTriggerRule: Rule;
     alarms: Alarm[] = [];
 
-    constructor(parent: App, name: string, props: PubSubStackProps) {
+    constructor(parent: Construct, name: string, props: PubSubStackProps) {
         super(parent, name, <StackProps>{
             ...props
         });

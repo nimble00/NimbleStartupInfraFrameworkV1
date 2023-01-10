@@ -6,6 +6,7 @@ import {ExpectedResult, IntegTest, InvocationType} from "@aws-cdk/integ-tests-al
 import {PubSubStack} from "./pub-sub";
 import {CtLambdaStack} from "./lambdas";
 import {joinStrings} from "../common/utils";
+import {Construct} from "constructs";
 
 
 export interface IntegTestsStackProps {
@@ -26,17 +27,17 @@ Refer the documentation for writing various sorts of checks in integ-tests -
  */
 export class IntegTestsStack extends Stack {
 
-    constructor(parent: App, name: string, props: IntegTestsStackProps) {
+    constructor(parent: Construct, name: string, props: IntegTestsStackProps) {
         super(parent, name, <StackProps>{
             ...props
         });
 
-        this.createIntegrationTestingInfra(this, props);
+        this.createIntegrationTestingInfra(props);
     }
 
-    private createIntegrationTestingInfra(scope: Stack, props: IntegTestsStackProps) {
-        const integ = new IntegTest(props.app, joinStrings('IntegrationTests', props.suffix), {
-            testCases: [props.CtLambdaStack],
+    private createIntegrationTestingInfra(props: IntegTestsStackProps) {
+        const integ = new IntegTest(this, joinStrings('IntegrationTests', props.suffix), {
+            testCases: [props.CtLambdaStack, props.PubSubStack],
         });
 
         integ.assertions.invokeFunction({
@@ -44,6 +45,19 @@ export class IntegTestsStack extends Stack {
             invocationType: InvocationType.EVENT,
             payload: JSON.stringify({status: 'OK'}),
         });
+
+        console.log("ABCDEFGHIJKL");
+        console.log("ABCDEFGHIJKL");
+        console.log("ABCDEFGHIJKL");
+        console.log("ABCDEFGHIJKL");
+        console.log(this.environment);
+        console.log("QWERTYQWERTY");
+        console.log("QWERTYQWERTY");
+        console.log("QWERTYQWERTY");
+        console.log("QWERTYQWERTY");
+        console.log(props.PubSubStack.environment);
+        console.log("!@#$%^&^%$#@!");
+
 
         const message = integ.assertions.awsApiCall('SQS', 'receiveMessage', {
             QueueUrl: props.PubSubStack.CtEventsQueue.queueUrl,

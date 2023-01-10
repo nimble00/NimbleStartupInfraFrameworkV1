@@ -8,6 +8,7 @@ import {
     CLICK_THRU_DDB_TABLE_TTL_KEY
 } from "../common/datastore-constants";
 import {MINUTES_1, MINUTES_5, STATISTIC} from "../monitoring/telemetry-constants";
+import {Construct} from "constructs";
 
 export interface DataStoresProps extends StackProps {
     readonly env: Environment;
@@ -29,7 +30,7 @@ export class DataStoresStack extends Stack {
 
     public readonly ddbTable: Table;
 
-    constructor(parent: App, name: string, props: DataStoresProps) {
+    constructor(parent: Construct, name: string, props: DataStoresProps) {
         super(parent, name, <StackProps>{
             ...props
         });

@@ -17,7 +17,7 @@ export class MyPipelineStack extends Stack {
         const pipeline = new CodePipeline(this, 'MyPipeline', {
             pipelineName: 'MyPipeline',
             synth: new ShellStep('Synth', {
-                input: CodePipelineSource.gitHub('OWNER/REPO', 'main'),
+                input: CodePipelineSource.gitHub('nimble00/NimbleStartupInfraFrameworkV1', 'main'),
                 commands: ['npm ci', 'npm run build', 'npx cdk synth']
             })
         });

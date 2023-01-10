@@ -16,6 +16,7 @@ import {CT_WRITE_LAMBDA_INVOKE_ERRORS_THRESHOLD, CT_WRITE_LAMBDA_NAME} from "../
 import * as path from "path";
 import {PubSubStack} from "./pub-sub";
 import {AlarmNames, SERVICE_RUNBOOK_LINK, STATISTIC} from "../monitoring/telemetry-constants";
+import {Construct} from "constructs";
 
 
 export interface CtLambdaStackProps {
@@ -37,7 +38,7 @@ export class CtLambdaStack extends Stack {
     CtLambdaBasicIamRole: Role;
     alarms: Alarm[] = [];
 
-    constructor(parent: App, name: string, props: CtLambdaStackProps) {
+    constructor(parent: Construct, name: string, props: CtLambdaStackProps) {
         super(parent, name, <StackProps>{
             ...props
         });
@@ -46,9 +47,6 @@ export class CtLambdaStack extends Stack {
         this.createCtLambdaAndMapping(this, props);
 
         this.createLambdaDashboard('CtEventsLambda', this.CtEventsLambda, props.PubSubStack.CtEventsQueue, props.PubSubStack.CtEventsDLQ, props.stage);
-        if (props.setupAlarms) {
-            this.createLambdaAlarms('CtEventsLambda', this.CtEventsLambda, props.stage);
-        }
     }
 
     private createLambdaIamRole(scope: Stack, props: CtLambdaStackProps) {
@@ -93,15 +91,16 @@ export class CtLambdaStack extends Stack {
             runtime: Runtime.PYTHON_3_8,
             memorySize: 1024,
             timeout: Duration.minutes(5), // limit: max 15 mins
-            handler: 'index.main',
+            handler: 'ct_write_handler.handle',
             vpc: props.secureVpc,
             deadLetterQueueEnabled: true,
             role: this.CtLambdaBasicIamRole,
             reservedConcurrentExecutions: 1,
-            code: Code.fromAsset(path.join(__dirname, '/../src/my-lambda')),
+            code: Code.fromAsset(path.join(__dirname, '/../src/lambdas')),
             environment: {
                 DDBTableArn: props.DataStoreStack.ddbTable.tableArn,
                 REGION: Stack.of(this).region,
+                LOG_LEVEL: 'INFO',
                 AVAILABILITY_ZONES: JSON.stringify(
                     Stack.of(this).availabilityZones,
                 ),
@@ -181,23 +180,6 @@ export class CtLambdaStack extends Stack {
                 left: [mainQ.metricNumberOfMessagesSent({statistic: STATISTIC.SUM})]
             }),
         );
-    }
-
-    private createLambdaAlarms(fname: string, productionVariant: Function, stage: string) {
-        let alarmsSev2_5: Alarm[] = [];
-
-        alarmsSev2_5.push(productionVariant.metricErrors({statistic: STATISTIC.SUM}).createAlarm(this,
-            `${fname}-${AlarmNames.LAMBDA_INVOCATION_ERRORS2}`, {
-                alarmName: `${fname}-LAMBDA_INVOCATION_ERRORS_SEV2`,
-                alarmDescription: `CT Lambda:${AlarmNames.LAMBDA_INVOCATION_ERRORS2} breached the threshold (${50}). \n
-                Refer the Service Runbook - ${SERVICE_RUNBOOK_LINK}`,
-                threshold: 50,
-                evaluationPeriods: 5,
-                treatMissingData: TreatMissingData.NOT_BREACHING
-            })
-        );
-
-        this.alarms.push(...alarmsSev2_5);
     }
 
 }

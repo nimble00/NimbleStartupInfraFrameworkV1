@@ -18,19 +18,19 @@ export class MyPipelineAppStage extends Stage {
     constructor(scope: Construct, id: string, props: MyPipelineAppStageProps) {
         super(scope, id, props);
 
-        const vpcStack = new VpcStack(props.app, `Vpc-${props.suffix}`, {
+        const vpcStack = new VpcStack(this, `Vpc-${props.suffix}`, {
             app: props.app,
             env: props.env,
             suffix: props.suffix
         });
 
-        const dataStoreStack = new DataStoresStack(props.app, `DataStore-${props.suffix}`, {
+        const dataStoreStack = new DataStoresStack(this, `DataStore-${props.suffix}`, {
             env: props.env,
             suffix: props.suffix,
             vpcStack: vpcStack
         });
 
-        const pubSubStack = new PubSubStack(props.app, `PubSub-${props.suffix}`, {
+        const pubSubStack = new PubSubStack(this, `PubSub-${props.suffix}`, {
             app: props.app,
             env: props.env,
             queuesConfig: props.stageConfig.queuesConfig,
@@ -40,7 +40,7 @@ export class MyPipelineAppStage extends Stage {
             vpcStack: vpcStack
         });
 
-        const ctLambdaStack = new CtLambdaStack(props.app, `Lambdas-${props.suffix}`, {
+        const ctLambdaStack = new CtLambdaStack(this, `Lambdas-${props.suffix}`, {
             DataStoreStack: dataStoreStack,
             PubSubStack: pubSubStack,
             app: props.app,
@@ -51,8 +51,10 @@ export class MyPipelineAppStage extends Stage {
             stage: props.stageConfig.name,
             suffix: props.suffix
         });
+        ctLambdaStack.addDependency(pubSubStack);
+        ctLambdaStack.addDependency(dataStoreStack);
 
-        const integTestsStack = new IntegTestsStack(props.app, `IntegTests-${props.suffix}`, {
+        const integTestsStack = new IntegTestsStack(this, `IntegTests-${props.suffix}`, {
             CtLambdaStack: ctLambdaStack,
             DataStoreStack: dataStoreStack,
             PubSubStack: pubSubStack,
@@ -61,5 +63,6 @@ export class MyPipelineAppStage extends Stage {
             stage: props.stageConfig.name,
             suffix: props.suffix
         })
+        integTestsStack.addDependency(ctLambdaStack);
     }
 }

@@ -5,7 +5,7 @@ import {STAGE} from "./base-constants";
 export const APPLICATION_NAME = 'APP_NAME';
 export const APP_ACC_ID = '367428151234';
 export const DEVO_ACC_ID = '367428151234';
-export const GAMMA_ACC_ID = '367428151234';
+export const GAMMA_ACC_ID = '367428151234'; // Can be same as DEVO unless significant scale differences
 export const PROD_ACC_ID = '367428151234';
 
 export const STAGES_CONFIG: any[] = [
@@ -15,23 +15,21 @@ export const STAGES_CONFIG: any[] = [
         setupAlarms: false,
         queuesConfig: QUEUES_CONFIG[STAGE.DEVO],
         lambdasConfig: LAMBDAS_CONFIG[STAGE.DEVO],
-        region: 'eu-west-1',
-        deploySpecificStack: true,
+        region: 'us-east-1',
         approvalStepConfig: {
-            runIntegrationTests: true,
+            runIntegrationTests: false,
         },
         enableTicketing: false
     },
     {
         accountId: DEVO_ACC_ID,
-        name: [STAGE.DEVO],
+        name: [STAGE.GAMMA],
         setupAlarms: false,
         queuesConfig: QUEUES_CONFIG[STAGE.DEVO],
         lambdasConfig: LAMBDAS_CONFIG[STAGE.DEVO],
-        region: 'us-east-1',
-        deploySpecificStack: true,
+        region: 'eu-west-1',
         approvalStepConfig: {
-            runIntegrationTests: false,
+            runIntegrationTests: true,
         },
         enableTicketing: false
     },
@@ -43,7 +41,6 @@ export const STAGES_CONFIG: any[] = [
         lambdasConfig: LAMBDAS_CONFIG[STAGE.PROD],
         prod: true,
         region: 'eu-west-1',
-        deploySpecificStack: true,
         approvalStepConfig: {
             runIntegrationTests: false,
         },
