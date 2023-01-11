@@ -3,10 +3,10 @@ import {LAMBDAS_CONFIG} from "./compute-constants";
 import {STAGE} from "./base-constants";
 
 export const APPLICATION_NAME = 'APP_NAME';
-export const APP_ACC_ID = '367428151234';
-export const DEVO_ACC_ID = '367428151234';
-export const GAMMA_ACC_ID = '367428151234'; // Can be same as DEVO unless significant scale differences
-export const PROD_ACC_ID = '367428151234';
+export const APP_ACC_ID = '>AWS_ACC_ID<';
+export const DEVO_ACC_ID = '>AWS_ACC_ID<';
+export const GAMMA_ACC_ID = '>AWS_ACC_ID<'; // Can be same as DEVO unless significant scale differences
+export const PROD_ACC_ID = '>AWS_ACC_ID<';
 
 export const STAGES_CONFIG: any[] = [
     {

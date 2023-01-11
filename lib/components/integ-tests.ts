@@ -46,19 +46,6 @@ export class IntegTestsStack extends Stack {
             payload: JSON.stringify({status: 'OK'}),
         });
 
-        console.log("ABCDEFGHIJKL");
-        console.log("ABCDEFGHIJKL");
-        console.log("ABCDEFGHIJKL");
-        console.log("ABCDEFGHIJKL");
-        console.log(this.environment);
-        console.log("QWERTYQWERTY");
-        console.log("QWERTYQWERTY");
-        console.log("QWERTYQWERTY");
-        console.log("QWERTYQWERTY");
-        console.log(props.PubSubStack.environment);
-        console.log("!@#$%^&^%$#@!");
-
-
         const message = integ.assertions.awsApiCall('SQS', 'receiveMessage', {
             QueueUrl: props.PubSubStack.CtEventsQueue.queueUrl,
             WaitTimeSeconds: 20,
