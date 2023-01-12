@@ -2,7 +2,7 @@
 
 ## Why?
 This package is the "Code" that's known in tech-world as **Infrastructure as Code**.
-It carries a easily and highly extensible templates to setup following infra - 
+It carries concise and highly extensible templates to setup following infra - 
 1. SQS, SNS, EventBus+Rule
 2. Lambda, Integration Tests
 3. DynamoDb Table
