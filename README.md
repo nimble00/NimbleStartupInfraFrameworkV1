@@ -24,6 +24,12 @@ You may use this project for CDK development with TypeScript.
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 
+## Recommended / necessary readings
+1. https://aws.amazon.com/getting-started/guides/setup-environment/
+2. https://docs.aws.amazon.com/cli/latest/userguide/getting-started-version.html
+3. https://docs.aws.amazon.com/cdk/v2/guide/cdk_pipeline.html
+
+
 ## Other Useful Commands
 
 * `npm run build`   compile typescript to js
